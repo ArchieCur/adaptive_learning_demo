@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Learning Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+        }
+        
+        .learner-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .learner-selector h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .profile-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .profile-card:hover, .profile-card.active {
+            border-color: #667eea;
+            background: #eef2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .profile-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .profile-card h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .profile-card p {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .content-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        
+        .lesson-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .lesson-icon {
+            font-size: 3rem;
+            margin-right: 20px;
+            color: #667eea;
+        }
+        
+        .lesson-title h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .lesson-subtitle {
+            color: #718096;
+            font-size: 1rem;
+        }
+        
+        .adaptation-notice {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .lesson-content {
+            line-height: 1.6;
+        }
+        
+        .tip-container {
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .tip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .tip-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .tip-title {
+            color: #2d3748;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .visual-diagram {
+            background: #eef2ff;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .audio-control {
+            background: #2d3748;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s ease;
+        }
+        
+        .audio-control:hover {
+            background: #4a5568;
+        }
+        
+        .interactive-exercise {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .exercise-title {
+            color: #22543d;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .concept-map {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .concept-node {
+            background: #eef2ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .concept-node::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .concept-node:nth-child(3n)::after {
+            display: none;
+        }
+        
+        .step-by-step {
+            counter-reset: step-counter;
+        }
+        
+        .step {
+            counter-increment: step-counter;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            background: #667eea;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .example-box {
+            background: #fffbf0;
+            border: 1px solid #f6e05e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .example-label {
+            color: #744210;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .prompt-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-area {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+    <script>
+        // Profile switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileCards = document.querySelectorAll('.profile-card');
+            const contentSections = {
+                'visual': document.getElementById('visual-content'),
+                'auditory': document.getElementById('auditory-content'),
+                'readwrite': document.getElementById('readwrite-content'),
+                'kinesthetic': document.getElementById('kinesthetic-content'),
+                'sequential': document.getElementById('sequential-content'),
+                'global': document.getElementById('global-content')
+            };
+            const defaultContent = document.getElementById('default-content');
+            
+            // Add click handlers to profile cards
+            profileCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const profile = this.getAttribute('data-profile');
+                    
+                    // Remove active class from all cards
+                    profileCards.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                    
+                    // Hide all content sections
+                    Object.values(contentSections).forEach(section => {
+                        if (section) section.classList.add('hidden');
+                    });
+                    if (defaultContent) defaultContent.classList.add('hidden');
+                    
+                    // Show selected content
+                    if (contentSections[profile]) {
+                        contentSections[profile].classList.remove('hidden');
+                    }
+                });
+            });
+        });
+        
+        // Interactive functions
+        function generatePrompt() {
+            const role = document.getElementById('role-select').value;
+            const specialty = document.getElementById('specialty-input').value;
+            const trait = document.getElementById('trait-select').value;
+            
+            if (!role) {
+                alert('Please select a role first!');
+                return;
+            }
+            
+            let prompt = `Act as a ${trait ? trait + ' ' : ''}${role}`;
+            if (specialty) {
+                prompt += ` specializing in ${specialty}`;
+            }
+            
+            const promptDiv = document.getElementById('generated-prompt');
+            promptDiv.innerHTML = prompt;
+            promptDiv.style.display = 'block';
+        }
+        
+        function copyToClipboard(element) {
+            navigator.clipboard.writeText(element.textContent).then(function() {
+                const originalBg = element.style.backgroundColor;
+                element.style.backgroundColor = '#48bb78';
+                setTimeout(() => {
+                    element.style.backgroundColor = originalBg;
+                }, 1000);
+            });
+        }
+        
+        function playAudio(type) {
+            // Placeholder for audio functionality
+            alert(`Audio placeholder: ${type} narration would play here`);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎯 Adaptive Learning Demonstration</h1>
+            <p>See how the same content transforms for different learning styles</p>
+        </header>
+        
+        <div class="learner-selector">
+            <h2>🧠 Select a Learner Profile</h2>
+            <p style="text-align: center; color: #718096; margin-bottom: 20px;">
+                Choose a learning profile to see how the Copilot Prompt Toolkit adapts
+            </p>
+            
+            <div class="profile-grid">
+                <div class="profile-card" data-profile="visual">
+                    <span class="profile-icon">👁️</span>
+                    <h3>Visual Learner</h3>
+                    <p>Prefers diagrams, charts, and visual representations. Learns best through concept maps and infographics.</p>
+                </div>
+                
+                <div class="profile-card" data-profile="auditory">
+                    <span class="profile-icon">🎧</span>
+                    <h3>Auditory Learner</h3>
+                    <p>Learns through listening and discussion. Benefits from narration, audio examples, and verbal explanations.</p>
+                </div>
+                
+                <div class="profile-card" data-profile="readwrite">
+                    <span class="profile-icon">📝</span>
+                    <h3>Read-Write Learner</h3>
+                    <p>Processes information through reading and writing. Prefers text-based content and note-taking.</p>
+                </div>
+                
+                <div class="profile-card" data-profile="kinesthetic">
+                    <span class="profile-icon">🤲</span>
+                    <h3>Kinesthetic Learner</h3>
+                    <p>Learns through hands-on activities and practice. Needs interactive exercises and real examples.</p>
+                </div>
+                
+                <div class="profile-card" data-profile="sequential">
+                    <span class="profile-icon">📊</span>
+                    <h3>Sequential Learner</h3>
+                    <p>Needs step-by-step progression. Learns best with structured, linear presentation of information.</p>
+                </div>
+                
+                <div class="profile-card" data-profile="global">
+                    <span class="profile-icon">🌍</span>
+                    <h3>Global Learner</h3>
+                    <p>Needs the big picture first. Learns best when shown overall concepts before diving into details.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div id="default-content">
+                <div class="lesson-header">
+                    <span class="lesson-icon">🤖</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Choose a learner profile above to see adaptive content</p>
+                    </div>
+                </div>
+                <p style="color: #718096; text-align: center; font-size: 1.1rem; margin-top: 50px;">
+                    Select any learning profile above to see how AI can transform the same content to match individual learning preferences. 
+                    This demonstrates the power of truly personalized learning experiences.
+                </p>
+            </div>
+            
+            <!-- Visual Learner Content -->
+            <div id="visual-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">👁️</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Visual Learning Path</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    🎨 Content adapted for visual learning: Concept maps, diagrams, and visual hierarchies
+                </div>
+                
+                <div class="visual-diagram">
+                    <h3>🗺️ Prompt Mastery Concept Map</h3>
+                    <div class="concept-map">
+                        <div class="concept-node">
+                            <strong>1. Personas</strong><br>
+                            Give AI a role to play
+                        </div>
+                        <div class="concept-node">
+                            <strong>2. Combine</strong><br>
+                            Layer expertise + traits
+                        </div>
+                        <div class="concept-node">
+                            <strong>3. Ask for Help</strong><br>
+                            Let AI guide you
+                        </div>
+                        <div class="concept-node">
+                            <strong>4. Sculptor</strong><br>
+                            Refine iteratively
+                        </div>
+                        <div class="concept-node">
+                            <strong>5. Review</strong><br>
+                            Verify & fact-check
+                        </div>
+                        <div class="concept-node">
+                            <strong>6. Meta-Prompts</strong><br>
+                            AI writes prompts
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">1</div>
+                        <h3 class="tip-title">Adopt a Persona</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                        <div>
+                            <h4>🎭 Persona Types:</h4>
+                            <ul style="margin-left: 20px; line-height: 1.8;">
+                                <li>👨‍🏫 Expert Professor</li>
+                                <li>🔍 Skeptical Editor</li>
+                                <li>💼 Industry Specialist</li>
+                            </ul>
+                        </div>
+                        <div class="visual-diagram" style="margin: 0;">
+                            <strong>🔄 AI Knowledge Access</strong><br>
+                            Persona → Expertise → Better Output
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="example-box">
+                    <div class="example-label">💡 Visual Example:</div>
+                    <div style="background: #f0f8ff; padding: 10px; border-radius: 5px;">
+                        <strong>Simple:</strong> "Act as a marketing officer"<br>
+                        <strong>+Specialty:</strong> "Act as a marketing officer specializing in finance"<br>
+                        <strong>+Trait:</strong> "Act as a skeptical marketing officer specializing in finance"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Auditory Learner Content -->
+            <div id="auditory-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">🎧</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Auditory Learning Experience</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    🔊 Content adapted for auditory learning: Listen to narration and verbal explanations
+                </div>
+                
+                <button class="audio-control" onclick="playAudio('intro')">
+                    ▶️ Play Introduction
+                </button>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">1</div>
+                        <h3 class="tip-title">Adopt a Persona - Listen & Learn</h3>
+                    </div>
+                    
+                    <button class="audio-control" onclick="playAudio('personas')">
+                        🎵 Listen to Persona Explanation
+                    </button>
+                    
+                    <p><strong>Key Concept:</strong> Think of personas as giving Copilot a professional identity. When you say "Act as a skeptical editor," you're essentially hiring a virtual expert with that specific mindset and knowledge base.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-label">🗣️ Talk-Through Example:</div>
+                        <p style="font-style: italic;">
+                            "Let me walk you through this step by step. First, I'll start with a basic persona: 'Act as a chief marketing officer.' Now I'm adding expertise: 'specializing in finance.' Finally, I'll add a personality trait: 'skeptical.' Notice how each addition makes the AI's responses more targeted and useful."
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">2</div>
+                        <h3 class="tip-title">Think Like a Sculptor</h3>
+                    </div>
+                    
+                    <div class="audio-placeholder" style="background: #e2e8f0; border: 2px dashed #4a5568; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                        <strong>🎵 AUDIO PLACEHOLDER - Sculptor Metaphor</strong>
+                        <p style="font-style: italic; margin-top: 10px;">
+                            "Imagine you're a sculptor working with marble. You don't start by carving intricate details - you begin with rough shapes and gradually refine them. Prompting works exactly the same way. Your first prompt is like taking a chisel to raw marble - you're creating the basic form. Then you use follow-up prompts to add detail, adjust the tone, or reshape sections that aren't quite right. For example, you might start with 'Write a project proposal,' then follow up with 'Make it more formal,' then 'Add specific budget details,' and finally 'Adjust the timeline section.' Each prompt is another pass with your sculpting tools, bringing you closer to exactly what you need. Remember - prompting is a conversation, not a single request."
+                        </p>
+                    </div>
+                    
+                    <p><strong>Conversation Flow:</strong> "Remember, prompting is a conversation. Start broad, then refine. Your first prompt gets you marble, your follow-ups sculpt the masterpiece."</p>
+                </div>
+            </div>
+            
+            <!-- Read-Write Learner Content -->
+            <div id="readwrite-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">📝</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Text-Based Learning Guide</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    📖 Content optimized for reading and note-taking: Structured text with clear examples
+                </div>
+                
+                <h3>📋 Six Essential Prompting Techniques</h3>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">1</div>
+                        <h3 class="tip-title">Adopt a Persona</h3>
+                    </div>
+                    
+                    <p><strong>Definition:</strong> Give Copilot a specific role or character to embody when responding to your requests.</p>
+                    
+                    <p><strong>Why it works:</strong> Personas tap into AI's vast training data by accessing knowledge patterns associated with specific roles and expertise areas.</p>
+                    
+                    <div class="prompt-example">Act as an expert in [field]
+Act as a [role] specializing in [area]
+Act as a [trait] [role] with expertise in [specialty]</div>
+                    
+                    <p><strong>Example Progression:</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Basic:</strong> "Act as a chief marketing officer"</li>
+                        <li><strong>Specialized:</strong> "Act as a chief marketing officer specializing in finance"</li>
+                        <li><strong>Enhanced:</strong> "Act as a skeptical chief marketing officer specializing in finance"</li>
+                    </ul>
+                </div>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">2</div>
+                        <h3 class="tip-title">Ask for Copilot's Help</h3>
+                    </div>
+                    
+                    <p><strong>Technique:</strong> Instead of providing all requirements upfront, ask Copilot what information it needs to create better output.</p>
+                    
+                    <div class="prompt-example">Create a [task]. What resources would you need me to provide to create this [task]? Please ask any clarifying questions.</div>
+                    
+                    <p><strong>Benefits:</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Moves from generic to specific results</li>
+                        <li>Ensures you provide relevant information</li>
+                        <li>Creates a collaborative planning process</li>
+                    </ul>
+                </div>
+                
+                <div class="tip-container">
+                    <div class="tip-header">
+                        <div class="tip-number">3</div>
+                        <h3 class="tip-title">Think Like a Sculptor</h3>
+                    </div>
+                    
+                    <p><strong>Process:</strong> Start broad, then refine through iterative conversation.</p>
+                    
+                    <p><strong>Refinement Examples:</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>"That's a good start; can you expand on the second point?"</li>
+                        <li>"Rewrite that for a different audience."</li>
+                        <li>"Make the tone more formal/casual."</li>
+                        <li>"Add more specific examples."</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Kinesthetic Learner Content -->
+            <div id="kinesthetic-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">🤲</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Hands-On Learning Experience</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    ✋ Content designed for hands-on learning: Interactive exercises and real practice
+                </div>
+                
+                <div class="interactive-exercise">
+                    <div class="exercise-title">🛠️ Try It Now: Build Your First Persona</div>
+                    <p>Let's practice creating a persona prompt step by step:</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Step 1: Choose a basic role</label>
+                        <select id="role-select" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+                            <option value="">Select a role...</option>
+                            <option value="marketing manager">Marketing Manager</option>
+                            <option value="data scientist">Data Scientist</option>
+                            <option value="project manager">Project Manager</option>
+                            <option value="financial analyst">Financial Analyst</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Step 2: Add a specialty</label>
+                        <input type="text" id="specialty-input" placeholder="e.g., healthcare, startups, retail..." 
+                               style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Step 3: Add a trait</label>
+                        <select id="trait-select" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+                            <option value="">Select a trait...</option>
+                            <option value="skeptical">Skeptical</option>
+                            <option value="optimistic">Optimistic</option>
+                            <option value="detail-oriented">Detail-oriented</option>
+                            <option value="creative">Creative</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="generatePrompt()" style="background: #48bb78; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        🚀 Generate My Prompt
+                    </button>
+                    
+                    <div id="generated-prompt" style="margin-top: 15px; padding: 15px; background: #2d3748; color: white; border-radius: 8px; font-family: monospace; display: none;"></div>
+                </div>
+                
+                <div class="interactive-exercise">
+                    <div class="exercise-title">🎯 Practice Exercise: Meta-Prompting</div>
+                    <p>Try this real example - click to copy and test in your own Copilot:</p>
+                    
+                    <div class="prompt-example" onclick="copyToClipboard(this)" style="cursor: pointer; position: relative;">
+Create a prompt I can use in Microsoft Word that generates a professional project proposal. The prompt should include guidance for tone, structure (e.g., headings and bullet points), and relevant formatting elements like bold for section titles and numbered lists for deliverables. Please ask any clarifying questions.
+
+<div style="position: absolute; top: 5px; right: 5px; background: #4a5568; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Click to copy</div></div>
+                    
+                    <p style="margin-top: 15px;"><strong>What to expect:</strong> Copilot will ask you questions about your project scope, audience, timeline, and deliverables to create a customized prompt.</p>
+                </div>
+                
+                <div class="interactive-exercise">
+                    <div class="exercise-title">📝 Reflection Activity</div>
+                    <p>Think about a task you need to accomplish this week. Write down:</p>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li>What persona would be most helpful?</li>
+                        <li>What specialty knowledge do you need?</li>
+                        <li>What questions might you ask Copilot for help?</li>
+                    </ol>
+                    
+                    <textarea placeholder="Write your reflection here..." 
+                              style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-top: 10px; font-family: inherit;"></textarea>
+                </div>
+            </div>
+            <!-- Global Learner Content -->
+            <div id="global-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">🌍</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Big Picture Learning Path</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    🌍 Content structured for global learning: Overview first, then detailed exploration
+                </div>
+                
+                <div class="visual-diagram">
+                    <h3>🎯 The Complete Prompting Ecosystem</h3>
+                    <p><strong>Core Principle:</strong> Effective AI prompting is about creating the right conversational context to access AI's vast knowledge and capabilities. Think of it as learning to communicate with a knowledgeable but literal colleague who needs clear direction.</p>
+                    
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <h4>The Six Interconnected Strategies:</h4>
+                        <p><strong>Foundation Layer:</strong> Personas (who) + Context (what AI needs to know)<br>
+                        <strong>Interaction Layer:</strong> Collaborative questioning + Iterative refinement<br>
+                        <strong>Quality Layer:</strong> Human verification + Meta-prompting for optimization</p>
+                    </div>
+                </div>
+                
+                <h3>🔄 How It All Connects</h3>
+                <p>The six techniques work together as a system rather than standalone methods. You start with personas to establish expertise, use collaborative questioning to define scope, then iteratively sculpt your results while maintaining human oversight. Meta-prompts help you optimize the entire process.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0;">
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>🎭 Strategy Overview: Personas</h4>
+                        <p><strong>Purpose:</strong> Access specialized knowledge patterns within AI training</p>
+                        <p><strong>When to use:</strong> Every prompt benefits from role context</p>
+                        <p><strong>Connection:</strong> Forms the foundation for all other techniques</p>
+                    </div>
+                    
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>🤝 Strategy Overview: Collaboration</h4>
+                        <p><strong>Purpose:</strong> Let AI help define what information it needs</p>
+                        <p><strong>When to use:</strong> Complex projects or unfamiliar territory</p>
+                        <p><strong>Connection:</strong> Pairs with personas to create comprehensive briefs</p>
+                    </div>
+                    
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>🎨 Strategy Overview: Sculpting</h4>
+                        <p><strong>Purpose:</strong> Iterative refinement through conversation</p>
+                        <p><strong>When to use:</strong> When initial results need adjustment</p>
+                        <p><strong>Connection:</strong> Works with verification to ensure quality</p>
+                    </div>
+                    
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>✅ Strategy Overview: Verification</h4>
+                        <p><strong>Purpose:</strong> Human oversight and fact-checking</p>
+                        <p><strong>When to use:</strong> Always - treat AI as brilliant first draft</p>
+                        <p><strong>Connection:</strong> Essential final step for all techniques</p>
+                    </div>
+                    
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>🔧 Strategy Overview: Meta-Prompts</h4>
+                        <p><strong>Purpose:</strong> Use AI to improve your prompting</p>
+                        <p><strong>When to use:</strong> When you're unsure how to structure a request</p>
+                        <p><strong>Connection:</strong> Optimizes the entire prompting process</p>
+                    </div>
+                    
+                    <div class="tip-container" style="margin: 0;">
+                        <h4>🔄 The Complete Cycle</h4>
+                        <p><strong>1.</strong> Choose persona based on need<br>
+                        <strong>2.</strong> Ask AI what it needs to succeed<br>
+                        <strong>3.</strong> Iteratively refine results<br>
+                        <strong>4.</strong> Verify and fact-check output<br>
+                        <strong>5.</strong> Use meta-prompts to optimize</p>
+                    </div>
+                </div>
+                
+                <div class="example-box">
+                    <div class="example-label">🌟 Complete Workflow Example:</div>
+                    <p><strong>Goal:</strong> Create a project proposal for workforce modernization</p>
+                    <p><strong>Step 1 - Persona:</strong> "Act as an experienced management consultant specializing in organizational change"</p>
+                    <p><strong>Step 2 - Collaboration:</strong> "What information would you need to create an effective proposal? Please ask clarifying questions."</p>
+                    <p><strong>Step 3 - Sculpting:</strong> "Good start. Make the tone more formal and add specific budget considerations."</p>
+                    <p><strong>Step 4 - Verification:</strong> Review all facts, figures, and recommendations for accuracy</p>
+                    <p><strong>Step 5 - Meta-optimization:</strong> "Evaluate this proposal and suggest improvements to make it more compelling."</p>
+                </div>
+                
+                <h3>💡 Key Insight for Global Learners</h3>
+                <p>The power isn't in any individual technique, but in understanding how they combine to create a comprehensive approach to AI collaboration. Each technique addresses a different aspect of the challenge: accessing knowledge (personas), defining scope (collaboration), refining quality (sculpting), ensuring accuracy (verification), and continuous improvement (meta-prompting).</p>
+            </div>
+            <div id="sequential-content" class="hidden">
+                <div class="lesson-header">
+                    <span class="lesson-icon">📊</span>
+                    <div class="lesson-title">
+                        <h2>Copilot Prompt Toolkit</h2>
+                        <p class="lesson-subtitle">Step-by-Step Learning Path</p>
+                    </div>
+                </div>
+                
+                <div class="adaptation-notice">
+                    📋 Content organized sequentially: Each step builds on the previous one
+                </div>
+                
+                <h3>🎯 Learning Objectives</h3>
+                <p>By the end of this lesson, you will be able to:</p>
+                <ol style="margin-left: 20px; line-height: 1.8; margin-bottom: 25px;">
+                    <li>Create effective persona prompts</li>
+                    <li>Use conversational refinement techniques</li>
+                    <li>Apply meta-prompting strategies</li>
+                    <li>Implement proper verification practices</li>
+                </ol>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Foundation: Understanding AI Personas</h4>
+                        <p>Before creating prompts, understand that AI has been trained on massive amounts of data from different professional fields. Personas help access this specialized knowledge.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Basic Persona Creation</h4>
+                        <p>Start with simple role assignment: "Act as a [profession]"</p>
+                        <div class="example-box">
+                            <div class="example-label">Example:</div>
+                            <code>"Act as a marketing manager"</code>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Add Specialization</h4>
+                        <p>Layer on specific expertise: "Act as a [profession] specializing in [field]"</p>
+                        <div class="example-box">
+                            <div class="example-label">Building on Step 2:</div>
+                            <code>"Act as a marketing manager specializing in healthcare"</code>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Include Personality Traits</h4>
+                        <p>Add behavioral characteristics: "Act as a [trait] [profession] specializing in [field]"</p>
+                        <div class="example-box">
+                            <div class="example-label">Complete persona:</div>
+                            <code>"Act as a skeptical marketing manager specializing in healthcare"</code>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Practice Conversational Refinement</h4>
+                        <p>After receiving initial output, use follow-up prompts to improve results:</p>
+                        <ul style="margin-left: 20px; line-height: 1.6;">
+                            <li>"
